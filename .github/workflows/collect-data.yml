@@ -1,0 +1,106 @@
+# Automated data collection workflow
+# Runs hourly to collect market data and stores it
+
+name: Collect Market Data
+
+on:
+  schedule:
+    # Cada hora a los 5 minutos (ej: 1:05, 2:05, etc.)
+    - cron: '5 * * * *'
+
+  # Permitir ejecución manual
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days of history to collect'
+        required: false
+        default: '7'
+      include_bulk:
+        description: 'Include bulk data download'
+        required: false
+        default: 'false'
+
+jobs:
+  collect-hourly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install ccxt pandas pyarrow aiohttp loguru
+
+      - name: Collect hourly data
+        run: |
+          cd backend
+          python -m scripts.collect_historical_data \
+            --days ${{ github.event.inputs.days || '7' }} \
+            --symbols "BTC/USDT,ETH/USDT" \
+            ${{ github.event.inputs.include_bulk == 'true' && '--include-bulk' || '' }}
+        env:
+          PYTHONPATH: .
+
+      - name: Verify collected data
+        run: |
+          cd backend
+          python -m scripts.collect_historical_data --verify
+
+      - name: Upload data artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-data-${{ github.run_number }}
+          path: backend/data/
+          retention-days: 30
+
+      # Opcional: Commit data al repo (solo para datos pequeños)
+      # - name: Commit data changes
+      #   run: |
+      #     git config --local user.email "action@github.com"
+      #     git config --local user.name "GitHub Action"
+      #     git add backend/data/
+      #     git diff --staged --quiet || git commit -m "chore: update market data [skip ci]"
+      #     git push
+
+  # Job semanal para recolección más extensa
+  collect-weekly:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 3 * * 0'  # Domingos a las 3am
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install ccxt pandas pyarrow aiohttp loguru
+
+      - name: Collect weekly data with bulk
+        run: |
+          cd backend
+          python -m scripts.collect_historical_data \
+            --days 90 \
+            --symbols "BTC/USDT,ETH/USDT,SOL/USDT" \
+            --include-bulk
+
+      - name: Upload weekly data
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-market-data-${{ github.run_number }}
+          path: backend/data/
+          retention-days: 90

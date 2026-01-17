@@ -1,0 +1,22 @@
+# ===========================================
+# CONJUAL - Railway Configuration
+# ===========================================
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Use production stage
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+
+# Health check
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+
+# Restart policy
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Resources (adjust based on Railway plan)
+numReplicas = 1
