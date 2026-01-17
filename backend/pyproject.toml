@@ -18,6 +18,7 @@ dependencies = [
     # Database
     "sqlalchemy[asyncio]>=2.0.25",
     "asyncpg>=0.29.0",
+    "aiosqlite>=0.19.0",  # SQLite async for development
     "alembic>=1.13.0",
 
     # Authentication

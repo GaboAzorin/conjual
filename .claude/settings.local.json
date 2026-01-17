@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Bash(pip:*)",
+      "Bash(docker --version:*)",
+      "Bash(python -m venv:*)",
+      "Bash(.venvScriptspip install --upgrade pip)",
+      "Bash(venv/Scripts/pip.exe install:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(venv/Scripts/uvicorn.exe:*)",
+      "Bash(curl:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY4Njk1MDE3LCJ0eXBlIjoiYWNjZXNzIn0.YWCWrg1vMjoEZ98TJroc4asIkufmMPa5VKB--Yhj2Hs\")"
     ]
   }
 }

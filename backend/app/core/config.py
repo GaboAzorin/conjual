@@ -24,7 +24,10 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/conjual"
+    # SQLite for development, PostgreSQL for production
+    # SQLite: sqlite+aiosqlite:///./conjual.db
+    # PostgreSQL: postgresql+asyncpg://user:pass@localhost:5432/conjual
+    DATABASE_URL: str = "sqlite+aiosqlite:///./conjual.db"
 
     # JWT Authentication
     JWT_SECRET_KEY: str = "CHANGE-THIS-IN-PRODUCTION-USE-SECURE-KEY"

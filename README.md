@@ -838,16 +838,16 @@ if __name__ == "__main__":
 
 ## 5. PLAN DE IMPLEMENTACIÓN POR FASES
 
-### FASE 0: SETUP INICIAL (1-2 días)
+### FASE 0: SETUP INICIAL (1-2 días) ✅
 **Objetivo:** Preparar el entorno de desarrollo
 
-- [ ] 0.1 Configurar estructura de carpetas
-- [ ] 0.2 Inicializar proyecto Python (pyproject.toml / poetry)
+- [x] 0.1 Configurar estructura de carpetas
+- [x] 0.2 Inicializar proyecto Python (pyproject.toml / poetry)
 - [ ] 0.3 Inicializar proyecto Expo
 - [ ] 0.4 Configurar git hooks (pre-commit)
-- [ ] 0.5 Configurar linters (ruff, eslint)
-- [ ] 0.6 Crear .env.example para variables de entorno
-- [ ] 0.7 Documentar comandos de desarrollo
+- [x] 0.5 Configurar linters (ruff, eslint)
+- [x] 0.6 Crear .env.example para variables de entorno
+- [x] 0.7 Documentar comandos de desarrollo
 
 **Entregables:**
 - Repositorio configurado
@@ -856,35 +856,35 @@ if __name__ == "__main__":
 
 ---
 
-### FASE 1: BACKEND CORE (3-5 días)
+### FASE 1: BACKEND CORE (3-5 días) 🔄
 **Objetivo:** API funcional básica
 
 #### 1.1 Estructura FastAPI
-- [ ] 1.1.1 Setup FastAPI con estructura modular
-- [ ] 1.1.2 Configuración de CORS
-- [ ] 1.1.3 Health check endpoints
-- [ ] 1.1.4 Manejo de errores global
-- [ ] 1.1.5 Logging estructurado
+- [x] 1.1.1 Setup FastAPI con estructura modular
+- [x] 1.1.2 Configuración de CORS
+- [x] 1.1.3 Health check endpoints
+- [x] 1.1.4 Manejo de errores global
+- [x] 1.1.5 Logging estructurado (loguru)
 
 #### 1.2 Base de Datos
-- [ ] 1.2.1 Configurar PostgreSQL local
-- [ ] 1.2.2 Modelos SQLAlchemy (User, Portfolio, Trade, Order)
+- [x] 1.2.1 Configurar SQLite (dev) / PostgreSQL (prod)
+- [x] 1.2.2 Modelos SQLAlchemy (User, Portfolio, Trade, Order, OHLCV)
 - [ ] 1.2.3 Migraciones Alembic
 - [ ] 1.2.4 Seeds de datos iniciales
 
 #### 1.3 Autenticación
-- [ ] 1.3.1 JWT tokens (access + refresh)
-- [ ] 1.3.2 Endpoints login/register/refresh
+- [x] 1.3.1 JWT tokens (access + refresh)
+- [x] 1.3.2 Endpoints login/register/refresh
 - [ ] 1.3.3 Encriptación de API keys de exchanges
 - [ ] 1.3.4 Rate limiting
 
 #### 1.4 Integración con Exchange
-- [ ] 1.4.1 Servicio CCXT para Buda.com
-- [ ] 1.4.2 Obtener balance
-- [ ] 1.4.3 Obtener precios en tiempo real
-- [ ] 1.4.4 Colocar órdenes (limit, market)
-- [ ] 1.4.5 Cancelar órdenes
-- [ ] 1.4.6 Historial de órdenes
+- [x] 1.4.1 Servicio CCXT para Buda.com
+- [x] 1.4.2 Obtener balance (requiere API keys)
+- [x] 1.4.3 Obtener precios en tiempo real
+- [x] 1.4.4 Colocar órdenes (limit, market)
+- [x] 1.4.5 Cancelar órdenes
+- [x] 1.4.6 Historial de órdenes
 
 **Entregables:**
 - API REST funcional
@@ -1288,10 +1288,10 @@ REDIS_URL=<si-usas-redis>
 ### 8.1 Criterios de Aceptación por Fase
 
 #### Fase 1 (Backend)
-- [ ] `GET /health` retorna 200
-- [ ] Login genera JWT válido
-- [ ] Balance de Buda se obtiene correctamente
-- [ ] Orden de compra (paper) ejecuta sin error
+- [x] `GET /health` retorna 200 ✓
+- [x] Login genera JWT válido ✓
+- [ ] Balance de Buda se obtiene correctamente (requiere API keys)
+- [ ] Orden de compra (paper) ejecuta sin error (requiere API keys)
 
 #### Fase 2 (Frontend)
 - [ ] App carga en <3 segundos
@@ -1394,13 +1394,13 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 
 ## 12. CHECKLIST DE PROGRESO
 
-### Estado Actual
+### Estado Actual (Actualizado: 2026-01-17)
 
 ```
 [██████████] 100% - Fase 0: Setup Inicial ✓
-[████░░░░░░]  40% - Fase 1: Backend Core (en progreso)
+[████████░░]  80% - Fase 1: Backend Core ✓ (funcional, faltan detalles)
 [░░░░░░░░░░]   0% - Fase 2: Frontend Móvil
-[██░░░░░░░░]  20% - Fase 3: Trading Engine (parcial)
+[██░░░░░░░░]  20% - Fase 3: Trading Engine (estructura creada)
 [░░░░░░░░░░]   0% - Fase 4: Machine Learning
 [░░░░░░░░░░]   0% - Fase 5: Tiempo Real
 [░░░░░░░░░░]   0% - Fase 6: Deployment
@@ -1408,7 +1408,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 [░░░░░░░░░░]   0% - Fase 8: Producción
 ```
 
-### Completado en Fase 0
+### Completado en Fase 0 ✓
 
 - [x] Estructura de carpetas creada
 - [x] pyproject.toml configurado
@@ -1422,13 +1422,41 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 - [x] .gitignore y .env.example
 - [x] Trading engine core y Smart DCA strategy
 
-### Próximos Pasos Inmediatos
+### Completado en Fase 1 ✓
 
-1. **SIGUIENTE:** Completar Fase 1 - Configurar PostgreSQL y probar API
-2. Instalar dependencias: `cd backend && pip install -e .`
-3. Configurar .env con credenciales de Buda.com
-4. Ejecutar: `uvicorn app.main:app --reload`
-5. Probar endpoints en http://localhost:8000/docs
+- [x] FastAPI funcionando en http://localhost:8000
+- [x] SQLite configurado para desarrollo
+- [x] Autenticación JWT con Argon2id (más seguro que bcrypt)
+- [x] Endpoints de auth probados (register, login, /me)
+- [x] Endpoints de mercado y estrategias funcionando
+- [x] Documentación Swagger en /docs
+- [x] CORS configurado
+- [x] Servidor probado y estable
+
+### Pendiente para completar Fase 1
+
+- [ ] Agregar API keys de Buda.com al .env
+- [ ] Probar conexión real con exchange
+- [ ] Configurar Alembic para migraciones
+- [ ] Rate limiting
+
+### Próximos Pasos
+
+1. **Opción A:** Agregar API keys de Buda.com y probar trading real
+2. **Opción B:** Iniciar Fase 2 - Frontend móvil (React Native + Expo)
+3. **Opción C:** Ejecutar recolección de datos históricos
+
+### Comandos para continuar
+
+```bash
+# Activar entorno e iniciar servidor
+cd backend
+.\venv\Scripts\activate   # Windows
+uvicorn app.main:app --reload
+
+# Ver documentación API
+# Abrir: http://localhost:8000/docs
+```
 
 ---
 
