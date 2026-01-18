@@ -49,9 +49,17 @@ class Settings(BaseSettings):
     # Trading Configuration
     TRADING_ENABLED: bool = False  # Safety: disabled by default
     PAPER_TRADING: bool = True  # Start with paper trading
-    MAX_SINGLE_TRADE_PCT: float = 0.25  # 25% max per trade
+    MAX_SINGLE_TRADE_PCT: float = 0.20  # 20% max per trade
     MAX_DAILY_LOSS_PCT: float = 0.10  # 10% daily loss limit
     MIN_BALANCE_CLP: int = 5000  # Always keep 5000 CLP
+
+    # Risk Management
+    TRADE_COOLDOWN_MINUTES: int = 30  # 30 min between trades
+    MAX_DAILY_TRADES: int = 3  # Max 3 trades per day
+    BUDA_FEE_PCT: float = 0.008  # 0.8% Buda fee
+
+    # Paper Trading
+    PAPER_INITIAL_BALANCE_CLP: int = 20000  # ~$20 USD starting balance
 
     # Data Collection
     DATA_COLLECTION_ENABLED: bool = True

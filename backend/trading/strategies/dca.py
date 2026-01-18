@@ -12,8 +12,8 @@ from decimal import Decimal
 from typing import Optional
 
 import pandas as pd
-import pandas_ta as ta
 
+from trading.indicators.technical import calculate_rsi
 from trading.strategies.base import BaseStrategy, Signal, TradeSignal
 
 
@@ -65,8 +65,9 @@ class SmartDCAStrategy(BaseStrategy):
         if indicators and "rsi" in indicators:
             rsi = indicators["rsi"]
         else:
-            rsi_series = ta.rsi(ohlcv["close"], length=14)
-            rsi = rsi_series.iloc[-1] if not rsi_series.empty else 50
+            rsi = calculate_rsi(ohlcv, length=14)
+            if rsi is None:
+                rsi = 50  # Default to neutral if calculation fails
 
         current_price = Decimal(str(ohlcv["close"].iloc[-1]))
 
