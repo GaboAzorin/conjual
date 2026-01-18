@@ -39,10 +39,14 @@ export default function RegisterScreen() {
     }
 
     clearError();
-    const success = await register({ email, password });
-
-    if (!success && error) {
-      Alert.alert('Error', error);
+    try {
+      const success = await register({ email, password });
+      if (!success) {
+        const currentError = useAuthStore.getState().error;
+        Alert.alert('Error', currentError || 'Error al registrarse');
+      }
+    } catch {
+      Alert.alert('Error', 'Error de conexión. Intenta de nuevo.');
     }
   };
 

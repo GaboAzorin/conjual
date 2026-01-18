@@ -44,10 +44,10 @@ export const botService = {
   },
 
   async getTrades(limit: number = 50): Promise<Trade[]> {
-    const response = await api.get<Trade[]>(API_CONFIG.ENDPOINTS.BOT_TRADES, {
+    const response = await api.get<{ trades: Trade[] }>(API_CONFIG.ENDPOINTS.BOT_TRADES, {
       params: { limit },
     });
-    return response.data;
+    return response.data.trades || [];
   },
 
   async getPerformance(): Promise<BotPerformance> {

@@ -1,9 +1,9 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 
@@ -23,24 +23,36 @@ SplashScreen.preventAutoHideAsync();
 function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
+  const navigationState = useRootNavigationState();
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    const doCheck = async () => {
+      await checkAuth();
+      setHasCheckedAuth(true);
+    };
+    doCheck();
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    // Wait for navigation to be ready and auth check to complete
+    if (!navigationState?.key || isLoading || !hasCheckedAuth) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
+    const inLoginOrRegister = segments[0] === 'login' || segments[0] === 'register';
 
-    if (!isAuthenticated && inTabsGroup) {
-      router.replace('/login');
-    } else if (isAuthenticated && (inAuthGroup || segments[0] === 'login')) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, segments, isLoading]);
+    // Use setTimeout to ensure navigation happens after render
+    const timeout = setTimeout(() => {
+      if (!isAuthenticated && inTabsGroup) {
+        router.replace('/login');
+      } else if (isAuthenticated && inLoginOrRegister) {
+        router.replace('/(tabs)');
+      }
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated, segments, isLoading, navigationState?.key, hasCheckedAuth]);
 }
 
 export default function RootLayout() {

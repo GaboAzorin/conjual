@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { API_CONFIG } from '@/constants/api';
 
@@ -15,10 +16,14 @@ const api: AxiosInstance = axios.create({
 const ACCESS_TOKEN_KEY = 'conjual_access_token';
 const REFRESH_TOKEN_KEY = 'conjual_refresh_token';
 
-// Token management functions
+// Token management functions with platform-specific storage
+// Web uses localStorage, native uses SecureStore
 export const tokenStorage = {
   async getAccessToken(): Promise<string | null> {
     try {
+      if (Platform.OS === 'web') {
+        return localStorage.getItem(ACCESS_TOKEN_KEY);
+      }
       return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
     } catch {
       return null;
@@ -27,6 +32,9 @@ export const tokenStorage = {
 
   async getRefreshToken(): Promise<string | null> {
     try {
+      if (Platform.OS === 'web') {
+        return localStorage.getItem(REFRESH_TOKEN_KEY);
+      }
       return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
     } catch {
       return null;
@@ -34,13 +42,23 @@ export const tokenStorage = {
   },
 
   async setTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+    if (Platform.OS === 'web') {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    } else {
+      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
+      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+    }
   },
 
   async clearTokens(): Promise<void> {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    if (Platform.OS === 'web') {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    } else {
+      await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    }
   },
 };
 

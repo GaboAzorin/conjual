@@ -22,15 +22,20 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor ingresa email y contrasena');
+      Alert.alert('Error', 'Por favor ingresa email y contraseña');
       return;
     }
 
     clearError();
-    const success = await login({ username: email, password });
-
-    if (!success && error) {
-      Alert.alert('Error', error);
+    try {
+      const success = await login({ username: email, password });
+      if (!success) {
+        // Error is already set in the store, get it from the current state
+        const currentError = useAuthStore.getState().error;
+        Alert.alert('Error', currentError || 'Error al iniciar sesión');
+      }
+    } catch {
+      Alert.alert('Error', 'Error de conexión. Intenta de nuevo.');
     }
   };
 

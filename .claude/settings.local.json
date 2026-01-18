@@ -27,7 +27,13 @@
       "Bash(npm --version)",
       "Bash(npx create-expo-app@latest:*)",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(.venvScriptsactivate)",
+      "Bash(uvicorn app.main:app:*)",
+      "Bash(powershell -Command \"Start-Sleep -Seconds 5; Invoke-WebRequest -Uri ''http://localhost:8000/health'' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
+      "Bash(\"C:\\\\Users\\\\Gabriel\\\\Documents\\\\Python\\\\conjual\\\\backend\\\\venv\\\\Scripts\\\\python.exe\" -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --app-dir \"C:\\\\Users\\\\Gabriel\\\\Documents\\\\Python\\\\conjual\\\\backend\")",
+      "Bash(npx expo start --tunnel)",
+      "Bash(npx expo start --web --port 8081)"
     ]
   }
 }
