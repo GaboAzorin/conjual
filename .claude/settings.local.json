@@ -10,7 +10,24 @@
       "Bash(venv/Scripts/python.exe:*)",
       "Bash(venv/Scripts/uvicorn.exe:*)",
       "Bash(curl:*)",
-      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY4Njk1MDE3LCJ0eXBlIjoiYWNjZXNzIn0.YWCWrg1vMjoEZ98TJroc4asIkufmMPa5VKB--Yhj2Hs\")"
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY4Njk1MDE3LCJ0eXBlIjoiYWNjZXNzIn0.YWCWrg1vMjoEZ98TJroc4asIkufmMPa5VKB--Yhj2Hs\")",
+      "Bash(dir:*)",
+      "Bash(python -c:*)",
+      "Bash(./venv/Scripts/python:*)",
+      "Bash(./venv/Scripts/pip:*)",
+      "Bash(python -m pip:*)",
+      "Bash(\"C:\\\\Users\\\\Gabriel\\\\Documents\\\\Python\\\\conjual\\\\backend\\\\venv\\\\Scripts\\\\pip.exe\" install argon2-cffi)",
+      "Bash(\"C:\\\\Users\\\\Gabriel\\\\Documents\\\\Python\\\\conjual\\\\backend\\\\venv\\\\Scripts\\\\python.exe\" -m uvicorn:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(npx create-expo-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

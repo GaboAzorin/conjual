@@ -1,9 +1,9 @@
 # CONJUAL - Sistema de Trading Inteligente Autónomo
 
-> **Versión:** 0.3.0 (Paper Trading Verificado)
+> **Versión:** 0.4.0 (Frontend Móvil)
 > **Última actualización:** 2026-01-18
 > **Capital inicial:** $20,000 CLP (~$20 USD)
-> **Estado:** Paper Trading FUNCIONAL - Probado End-to-End
+> **Estado:** Backend + Trading Engine + Frontend Móvil (85%)
 
 ---
 
@@ -893,45 +893,48 @@ if __name__ == "__main__":
 
 ---
 
-### FASE 2: FRONTEND MÓVIL (3-5 días)
+### FASE 2: FRONTEND MÓVIL (3-5 días) 🔄
 **Objetivo:** App móvil navegable y conectada
 
 #### 2.1 Setup Expo
-- [ ] 2.1.1 Crear proyecto Expo (expo-router template)
-- [ ] 2.1.2 Configurar NativeWind
-- [ ] 2.1.3 Configurar tema (colores, tipografía)
-- [ ] 2.1.4 Setup de navegación (tabs + stack)
+- [x] 2.1.1 Crear proyecto Expo (expo-router template)
+- [x] 2.1.2 Configurar NativeWind
+- [x] 2.1.3 Configurar tema (colores, tipografía)
+- [x] 2.1.4 Setup de navegación (tabs + stack)
 
 #### 2.2 Pantallas Base
-- [ ] 2.2.1 Splash screen
-- [ ] 2.2.2 Login/Register
-- [ ] 2.2.3 Dashboard principal
-- [ ] 2.2.4 Portfolio view
-- [ ] 2.2.5 Historial de trades
-- [ ] 2.2.6 Configuración
+- [x] 2.2.1 Splash screen (configurado en app.json)
+- [x] 2.2.2 Login/Register
+- [x] 2.2.3 Dashboard principal
+- [x] 2.2.4 Portfolio view (integrado en Dashboard)
+- [x] 2.2.5 Historial de trades
+- [x] 2.2.6 Configuración
 
 #### 2.3 Componentes UI
-- [ ] 2.3.1 Header con balance
-- [ ] 2.3.2 Card de precio (BTC, ETH)
+- [x] 2.3.1 Header con balance
+- [x] 2.3.2 Card de precio (BTC)
 - [ ] 2.3.3 Gráfico de línea simple
-- [ ] 2.3.4 Lista de transacciones
-- [ ] 2.3.5 Botones de acción (Buy/Sell)
-- [ ] 2.3.6 Modal de confirmación
-- [ ] 2.3.7 Loading states
-- [ ] 2.3.8 Empty states
-- [ ] 2.3.9 Error states
+- [x] 2.3.4 Lista de transacciones
+- [x] 2.3.5 Botones de acción (Start/Stop/Pause)
+- [x] 2.3.6 Modal de confirmación (Alerts)
+- [x] 2.3.7 Loading states
+- [x] 2.3.8 Empty states
+- [x] 2.3.9 Error states
 
 #### 2.4 Conexión API
-- [ ] 2.4.1 Service layer (axios/fetch)
-- [ ] 2.4.2 Zustand store para auth
-- [ ] 2.4.3 Zustand store para portfolio
-- [ ] 2.4.4 Zustand store para precios
+- [x] 2.4.1 Service layer (axios)
+- [x] 2.4.2 Zustand store para auth
+- [x] 2.4.3 Zustand store para bot
+- [x] 2.4.4 Zustand store para market
 - [ ] 2.4.5 WebSocket para precios en tiempo real
 
 **Entregables:**
-- App instalable en dispositivo
-- Flujo de login funcional
-- Vista de portfolio con datos reales
+- ✅ App estructurada con Expo + expo-router
+- ✅ Flujo de login/register funcional
+- ✅ Dashboard con datos del bot
+- ✅ Pantalla de control del bot
+- ✅ Historial de trades
+- ✅ Configuración del usuario
 
 ---
 
@@ -1399,7 +1402,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 ```
 [██████████] 100% - Fase 0: Setup Inicial ✓
 [██████████]  95% - Fase 1: Backend Core ✓ (VERIFICADO con tests)
-[░░░░░░░░░░]   0% - Fase 2: Frontend Móvil
+[████████░░]  85% - Fase 2: Frontend Móvil 🔄 (EN PROGRESO)
 [██████████]  95% - Fase 3: Trading Engine ✓ (PAPER TRADING VERIFICADO)
 [░░░░░░░░░░]   0% - Fase 4: Machine Learning
 [░░░░░░░░░░]   0% - Fase 5: Tiempo Real
@@ -1463,6 +1466,40 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 - [x] CORS configurado
 - [x] Servidor probado y estable
 
+### Completado en Fase 2 🔄 (Frontend Móvil - EN PROGRESO)
+
+- [x] **Setup Expo** (`mobile/`)
+  - Proyecto creado con `create-expo-app` y template tabs
+  - expo-router configurado para navegación file-based
+  - NativeWind (Tailwind CSS) configurado
+  - Tema oscuro personalizado para finanzas
+
+- [x] **Pantallas Base** (`mobile/app/`)
+  - `login.tsx` - Pantalla de inicio de sesión
+  - `register.tsx` - Registro de nuevos usuarios
+  - `(tabs)/index.tsx` - Dashboard principal con balance y stats
+  - `(tabs)/bot.tsx` - Control del bot (iniciar/pausar/detener)
+  - `(tabs)/trades.tsx` - Historial de trades
+  - `(tabs)/settings.tsx` - Configuración del usuario
+
+- [x] **Stores Zustand** (`mobile/stores/`)
+  - `authStore.ts` - Autenticación con JWT
+  - `botStore.ts` - Estado del bot y operaciones
+  - `marketStore.ts` - Datos de mercado (ticker, OHLCV)
+
+- [x] **Services API** (`mobile/services/`)
+  - `api.ts` - Cliente axios con interceptores JWT
+  - `auth.ts` - Login, register, refresh token
+  - `bot.ts` - Control del bot (start, stop, pause, resume)
+  - `market.ts` - Datos de mercado
+
+- [x] **Tipos TypeScript** (`mobile/types/`)
+  - User, AuthTokens, Portfolio, Trade, BotStatus, etc.
+
+- [ ] **Pendiente**
+  - Gráfico de precios con react-native-wagmi-charts
+  - WebSocket para actualizaciones en tiempo real
+
 ### Completado en Fase 3 ✅ (Trading Engine - VERIFICADO)
 
 - [x] **Risk Manager** (`trading/risk/manager.py`) - PROBADO
@@ -1508,49 +1545,37 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 
 ### Próximos Pasos
 
-> **Paper Trading COMPLETADO** - El sistema funciona end-to-end sin API keys
+> **Frontend Móvil 85% COMPLETADO** - App estructurada con todas las pantallas base
 
-1. **Opción A: (COMPLETADA)** ~~Probar paper trading completo~~ ✅
-2. **Opción B:** Agregar API keys de Buda.com y probar con datos reales
-3. **Opción C:** Iniciar Fase 2 - Frontend móvil (React Native + Expo)
-4. **Opción D:** Ejecutar recolección de datos históricos para ML
-5. **Opción E:** Crear tests unitarios (pytest) para >80% coverage
+1. ~~**Opción A:** Probar paper trading completo~~ ✅
+2. ~~**Opción C:** Iniciar Fase 2 - Frontend móvil~~ 🔄 (85% completado)
+3. **Opción B:** Agregar API keys de Buda.com y probar con datos reales
+4. **Opción D:** Agregar gráficos de precios (react-native-wagmi-charts)
+5. **Opción E:** Implementar WebSocket para tiempo real (Fase 5)
+6. **Opción F:** Ejecutar recolección de datos históricos para ML (Fase 4)
+7. **Opción G:** Crear tests unitarios (pytest) para >80% coverage
 
 ### Comandos para continuar
 
 ```bash
-# Activar entorno e iniciar servidor
+# === BACKEND ===
 cd backend
 .\venv\Scripts\activate   # Windows
 uvicorn app.main:app --reload
+# API: http://localhost:8000/docs
 
-# Ver documentación API
-# Abrir: http://localhost:8000/docs
+# === FRONTEND (NUEVO) ===
+cd mobile
+npm install              # Solo la primera vez
+npx expo start           # Iniciar servidor de desarrollo
+# Escanear QR con Expo Go (Android/iOS) o presionar 'w' para web
 
-# Probar Trading Engine (via curl o Postman)
-# 1. Registrar usuario
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "test@test.com", "password": "test123"}'
-
-# 2. Login
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "test@test.com", "password": "test123"}'
-
-# 3. Iniciar bot (paper trading)
-curl -X POST http://localhost:8000/api/v1/bot/start \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"paper_trading": true}'
-
-# 4. Ver status
-curl http://localhost:8000/api/v1/bot/status \
-  -H "Authorization: Bearer <TOKEN>"
-
-# 5. Detener bot
-curl -X POST http://localhost:8000/api/v1/bot/stop \
-  -H "Authorization: Bearer <TOKEN>"
+# === PROBAR CONEXIÓN ===
+# 1. Iniciar backend (terminal 1)
+# 2. Iniciar frontend (terminal 2)
+# 3. Registrar usuario en la app móvil
+# 4. Iniciar bot desde la pestaña "Bot"
+# 5. Ver trades en la pestaña "Trades"
 ```
 
 ---
