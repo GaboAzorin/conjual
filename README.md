@@ -1223,7 +1223,51 @@ def calculate_stop_loss(entry_price: float, atr: float) -> float:
 
 ## 8. DEPLOYMENT Y DEVOPS
 
-### 7.1 Dockerfile Backend
+### 8.1 Opción A: Cloud (Railway/VPS) - Costo: ~$5-10 USD/mes
+Ideal si quieres despreocuparte del hardware y tener alta disponibilidad.
+
+**Requisitos:**
+- Dockerfile (ya incluido)
+- Base de datos PostgreSQL gestionada (Railway lo incluye)
+- Redis (opcional para tareas pesadas)
+
+### 8.2 Opción B: Home Server (Recomendada $0 Costo)
+Ideal para presupuestos cero. Usas un PC viejo, Laptop o Raspberry Pi en casa.
+
+**Requisitos:**
+- PC con Linux/Windows encendido 24/7.
+- Python 3.11+ instalado.
+- Conexión a internet estable.
+
+**Arquitectura "Lite" (Optimizada para Home Server):**
+1. **DB:** SQLite (Archivo local, sin servidor pesado).
+2. **Cola de Tareas:** APScheduler (En memoria, sin Redis).
+3. **Exposición:** Cloudflare Tunnel (Para acceso seguro desde el móvil sin abrir puertos).
+
+#### Pasos para Home Server:
+
+1. **Iniciar Backend Local:**
+   ```bash
+   cd backend
+   # Windows
+   py -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   # Iniciar servidor
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+2. **Exponer a Internet (Cloudflare Tunnel):**
+   ```bash
+   # Instalar cloudflared
+   winget install Cloudflare.cloudflared
+
+   # Crear túnel temporal (para probar)
+   cloudflared tunnel --url http://localhost:8000
+   ```
+   *Esto te dará una URL tipo `https://random-name.trycloudflare.com` que usarás en la App Móvil.*
+
+### 8.3 Dockerfile Backend (Referencia)
 
 ```dockerfile
 FROM python:3.11-slim
@@ -1250,26 +1294,11 @@ EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-### 7.2 railway.toml
-
-```toml
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
-
-[deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/health"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-```
-
-### 7.3 Variables de Entorno Requeridas
+### 8.4 Variables de Entorno Requeridas
 
 ```bash
-# Base de datos
-DATABASE_URL=postgresql://...
+# Base de datos (SQLite para local, Postgres para Cloud)
+DATABASE_URL=sqlite+aiosqlite:///./conjual.db
 
 # JWT
 JWT_SECRET_KEY=<genera-uno-seguro>
@@ -1278,10 +1307,6 @@ JWT_ALGORITHM=HS256
 # Exchange (Buda.com)
 BUDA_API_KEY=<tu-api-key>
 BUDA_API_SECRET=<tu-api-secret>
-
-# Opcional
-SENTRY_DSN=<para-monitoreo>
-REDIS_URL=<si-usas-redis>
 ```
 
 ---
@@ -1540,7 +1565,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 
 - [ ] Agregar API keys de Buda.com al .env
 - [ ] Probar conexión real con exchange
-- [ ] Configurar Alembic para migraciones
+- [x] Configurar Alembic para migraciones
 - [ ] Rate limiting
 
 ### Próximos Pasos
@@ -1577,6 +1602,75 @@ npx expo start           # Iniciar servidor de desarrollo
 # 4. Iniciar bot desde la pestaña "Bot"
 # 5. Ver trades en la pestaña "Trades"
 ```
+
+---
+
+## 8. DEPLOYMENT Y DEVOPS
+
+### 8.1 Análisis de Costos y Opciones de Hosting
+
+Para un capital inicial de $20,000 CLP (~$22 USD), la eficiencia de costos es crítica.
+
+| Opción | Tipo | Costo Mensual | Estado | Decisión |
+|--------|------|---------------|--------|----------|
+| **Home Server** | Self-hosted | **$0 USD** | No viable por usuario | ❌ Descartado |
+| **AWS Free Tier** | Cloud (EC2) | **$0 USD** (12 meses) | Requiere tarjeta, expira en 1 año | ✅ **Elegido** |
+| **GCP Free Tier** | Cloud (e2-micro) | **$0 USD** (Siempre*) | Muy limitado (0.25 vCPU), complejo | ⚠️ Alternativa |
+| **Oracle Cloud** | Cloud (ARM) | **$0 USD** (Siempre) | Difícil registro, potentes recursos | ⚠️ Alternativa |
+| **VPS (Hetzner)** | IaaS | ~$5 USD | Bueno pero costoso para el capital | ⏳ Futuro |
+
+### 8.2 Estrategia Elegida: AWS Free Tier (EC2)
+
+Utilizaremos la capa gratuita de AWS (Amazon Web Services) que ofrece 750 horas/mes de instancias `t2.micro` o `t3.micro` durante los primeros 12 meses.
+
+**Ventajas:**
+1. **Costo Cero:** Cubre 24/7 de un servidor pequeño.
+2. **IP Pública:** Incluida.
+3. **Escalabilidad:** Si el bot crece, se puede pagar por más potencia.
+
+**Requisitos:**
+1. Cuenta AWS (requiere tarjeta de crédito/débito para verificación).
+2. Instancia `t2.micro` (1 vCPU, 1GB RAM).
+3. Sistema Operativo: Ubuntu Server 24.04 LTS.
+
+### 8.3 Guía de Despliegue en AWS EC2
+
+#### Paso 1: Lanzar Instancia
+1. Ir a AWS Console -> EC2 -> Launch Instance.
+2. Nombre: `conjual-bot`.
+3. OS: `Ubuntu`.
+4. Instance Type: `t2.micro` (Free tier eligible).
+5. Key Pair: Crear nuevo (`conjual-key.pem`).
+6. Security Group: Permitir SSH (22), HTTP (80), Custom (8000).
+
+#### Paso 2: Configurar Servidor
+Conectarse vía SSH:
+```bash
+ssh -i conjual-key.pem ubuntu@<IP-PUBLICA>
+```
+
+Instalar Docker (más fácil y limpio):
+```bash
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Clonar repo (o subir archivos)
+git clone https://github.com/tu-usuario/conjual.git
+cd conjual/backend
+
+# Crear .env
+nano .env  # Pegar contenido de .env.example
+```
+
+#### Paso 3: Ejecutar Bot
+```bash
+# Construir y correr en background
+sudo docker build -t conjual-backend .
+sudo docker run -d -p 8000:8000 --name conjual-app --restart unless-stopped conjual-backend
+```
+
+El bot ahora corre 24/7 en la nube gratis por un año.
 
 ---
 
