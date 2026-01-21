@@ -52,30 +52,44 @@ async def websocket_prices(websocket: WebSocket):
     await manager.connect(websocket)
 
     try:
-        # Send initial prices
+        # Send initial prices immediately
+        from app.services.exchange import ExchangeService
+        exchange = ExchangeService()
+        ticker = await exchange.get_ticker("BTC-CLP")
+        
         await websocket.send_json({
-            "type": "prices",
-            "data": {
-                "BTC-CLP": {"price": 95000000, "change_24h": 2.5},
-                "ETH-CLP": {"price": 3500000, "change_24h": -1.2},
-            },
+            "type": "ticker_update",
+            "data": ticker
         })
 
+        # Main loop: Broadcast prices every 3 seconds
         while True:
-            # Wait for messages from client
+            # 1. Wait for messages (ping/pong) with timeout
             try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                # We use a short timeout to allow the loop to run the broadcast logic
+                # even if no message is received
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=3.0)
                 message = json.loads(data)
 
                 if message.get("type") == "ping":
                     await websocket.send_json({"type": "pong"})
-                elif message.get("type") == "subscribe":
-                    # TODO: Handle subscription to specific symbols
-                    pass
 
             except asyncio.TimeoutError:
-                # Send heartbeat
-                await websocket.send_json({"type": "heartbeat"})
+                # Timeout reached: Time to broadcast update
+                pass
+            
+            # 2. Broadcast price update
+            try:
+                # Get fresh ticker
+                ticker = await exchange.get_ticker("BTC-CLP")
+                
+                # Send to client
+                await websocket.send_json({
+                    "type": "ticker_update",
+                    "data": ticker
+                })
+            except Exception as e:
+                logger.error(f"Error broadcasting price: {e}")
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)

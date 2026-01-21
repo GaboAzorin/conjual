@@ -1521,7 +1521,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 - [x] **Tipos TypeScript** (`mobile/types/`)
   - User, AuthTokens, Portfolio, Trade, BotStatus, etc.
 
-- [ ] **Pendiente**
+- [x] **Pendiente**
   - WebSocket para actualizaciones en tiempo real
 
 ### Completado en Fase 3 ✅ (Trading Engine - VERIFICADO)
@@ -1575,7 +1575,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 2. ~~**Opción C:** Iniciar Fase 2 - Frontend móvil~~ 🔄 (85% completado)
 3. **Opción B:** Agregar API keys de Buda.com y probar con datos reales
 4. ~~**Opción D:** Agregar gráficos de precios (react-native-wagmi-charts)~~ ✅
-5. **Opción E:** Implementar WebSocket para tiempo real (Fase 5)
+5. ~~**Opción E:** Implementar WebSocket para tiempo real (Fase 5)~~ ✅
 6. **Opción F:** Ejecutar recolección de datos históricos para ML (Fase 4)
 7. **Opción G:** Crear tests unitarios (pytest) para >80% coverage
 
