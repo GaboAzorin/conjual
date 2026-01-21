@@ -14,12 +14,25 @@ import { useBotStore, useMarketStore, useAuthStore } from '@/stores';
 export default function DashboardScreen() {
   const { user } = useAuthStore();
   const { status, fetchStatus } = useBotStore();
-  const { ticker, fetchTicker, ohlcv, fetchOHLCV, isLoading: marketLoading } = useMarketStore();
+  const { 
+    ticker, 
+    fetchTicker, 
+    ohlcv, 
+    fetchOHLCV, 
+    isLoading: marketLoading,
+    connectWebSocket,
+    disconnectWebSocket
+  } = useMarketStore();
 
   useEffect(() => {
     fetchStatus();
     fetchTicker();
     fetchOHLCV();
+    connectWebSocket();
+
+    return () => {
+      disconnectWebSocket();
+    };
   }, []);
 
   const onRefresh = async () => {

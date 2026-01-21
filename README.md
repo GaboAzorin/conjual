@@ -926,7 +926,7 @@ if __name__ == "__main__":
 - [x] 2.4.2 Zustand store para auth
 - [x] 2.4.3 Zustand store para bot
 - [x] 2.4.4 Zustand store para market
-- [ ] 2.4.5 WebSocket para precios en tiempo real
+- [x] 2.4.5 WebSocket para precios en tiempo real
 
 **Entregables:**
 - ✅ App estructurada con Expo + expo-router
@@ -935,6 +935,7 @@ if __name__ == "__main__":
 - ✅ Pantalla de control del bot
 - ✅ Historial de trades
 - ✅ Configuración del usuario
+- ✅ Actualización de precios en tiempo real (WebSocket)
 
 ---
 
@@ -1223,12 +1224,14 @@ def calculate_stop_loss(entry_price: float, atr: float) -> float:
 
 ## 8. DEPLOYMENT Y DEVOPS
 
-### 8.1 Opción A: Cloud (Railway/VPS) - Costo: ~$5-10 USD/mes
+### 8.1 Opción A: Cloud (AWS Free Tier / Railway) - Costo: $0 - $5 USD/mes
 Ideal si quieres despreocuparte del hardware y tener alta disponibilidad.
+
+**Guía detallada:** [Despliegue en AWS Free Tier](docs/deployment/aws_free_tier.md)
 
 **Requisitos:**
 - Dockerfile (ya incluido)
-- Base de datos PostgreSQL gestionada (Railway lo incluye)
+- Base de datos PostgreSQL (incluida en docker-compose)
 - Redis (opcional para tareas pesadas)
 
 ### 8.2 Opción B: Home Server (Recomendada $0 Costo)
@@ -1427,10 +1430,10 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 ```
 [██████████] 100% - Fase 0: Setup Inicial ✓
 [██████████]  95% - Fase 1: Backend Core ✓ (VERIFICADO con tests)
-[████████░░]  85% - Fase 2: Frontend Móvil 🔄 (EN PROGRESO)
+[██████████] 100% - Fase 2: Frontend Móvil ✓ (COMPLETADO)
 [██████████]  95% - Fase 3: Trading Engine ✓ (PAPER TRADING VERIFICADO)
 [░░░░░░░░░░]   0% - Fase 4: Machine Learning
-[░░░░░░░░░░]   0% - Fase 5: Tiempo Real
+[████░░░░░░]  40% - Fase 5: Tiempo Real 🔄 (WebSocket Frontend listo)
 [░░░░░░░░░░]   0% - Fase 6: Deployment
 [░░░░░░░░░░]   0% - Fase 7: QA
 [░░░░░░░░░░]   0% - Fase 8: Producción

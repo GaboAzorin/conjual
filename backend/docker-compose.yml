@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=conjual
+      - POSTGRES_PASSWORD=conjual_password_secure
+      - POSTGRES_DB=conjual
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conjual"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://conjual:conjual_password_secure@db:5432/conjual
+      - ENVIRONMENT=production
+      - PYTHONUNBUFFERED=1
+      # Claves vacías por defecto, deben pasarse en despliegue real
+      - BUDA_API_KEY=${BUDA_API_KEY:-}
+      - BUDA_API_SECRET=${BUDA_API_SECRET:-}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    restart: always
+
+volumes:
+  postgres_data:

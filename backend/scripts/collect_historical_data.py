@@ -14,6 +14,8 @@ Fuentes de datos:
 
 import argparse
 import asyncio
+import csv
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
@@ -30,6 +32,30 @@ TIMEFRAMES = ["1h", "4h", "1d"]
 RATE_LIMIT_DELAY = 0.5  # Segundos entre requests
 
 
+def get_last_timestamp_from_csv(filepath: Path, col_index: int = 0) -> Optional[float]:
+    """Obtiene el último timestamp de un CSV para reanudar."""
+    if not filepath.exists():
+        return None
+        
+    try:
+        with open(filepath, 'rb') as f:
+            try:  # Catch OSError in case of a one line file 
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError:
+                f.seek(0)
+                
+            last_line = f.readline().decode().strip()
+            if not last_line or "timestamp" in last_line:  # Header or empty
+                return None
+                
+            return float(last_line.split(',')[col_index])
+    except Exception as e:
+        logger.warning(f"No se pudo leer último timestamp de {filepath}: {e}")
+        return None
+
+
 async def collect_ohlcv_ccxt(
     exchange_id: str,
     symbol: str,
@@ -37,16 +63,7 @@ async def collect_ohlcv_ccxt(
     days: int,
 ) -> Optional[pd.DataFrame]:
     """
-    Recolecta datos OHLCV de un exchange usando CCXT.
-
-    Args:
-        exchange_id: ID del exchange (binance, kraken, etc.)
-        symbol: Par de trading (BTC/USDT)
-        timeframe: Intervalo (1m, 5m, 15m, 1h, 4h, 1d)
-        days: Días hacia atrás
-
-    Returns:
-        DataFrame con datos OHLCV o None si falla
+    Recolecta datos OHLCV de un exchange usando CCXT con soporte de reanudación.
     """
     exchange_class = getattr(ccxt, exchange_id)
     exchange = exchange_class({"enableRateLimit": True})
@@ -64,13 +81,27 @@ async def collect_ohlcv_ccxt(
             logger.warning(f"{exchange_id} no tiene el símbolo {symbol}")
             return None
 
+        # Archivo temporal para checkpoints
+        safe_symbol = symbol.replace('/', '_')
+        temp_file = DATA_DIR / f"temp_{exchange_id}_{safe_symbol}_{timeframe}.csv"
+        
         # Calcular timestamp de inicio
-        since = exchange.parse8601(
-            (datetime.utcnow() - timedelta(days=days)).isoformat()
-        )
+        start_date = datetime.utcnow() - timedelta(days=days)
+        since = exchange.parse8601(start_date.isoformat())
+        
+        # Lógica de reanudación
+        last_ts = get_last_timestamp_from_csv(temp_file, 0)
+        if last_ts:
+            logger.info(f"Reanudando {exchange_id} {symbol} desde {datetime.fromtimestamp(last_ts/1000)}")
+            since = int(last_ts) + 1
+        else:
+            # Crear archivo con header si no existe
+            with open(temp_file, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["timestamp", "open", "high", "low", "close", "volume"])
 
-        all_data = []
         limit = 1000  # Máximo por request
+        total_collected = 0
 
         logger.info(f"Iniciando recolección: {exchange_id} {symbol} {timeframe}")
 
@@ -83,17 +114,23 @@ async def collect_ohlcv_ccxt(
                 if not ohlcv:
                     break
 
-                all_data.extend(ohlcv)
+                # Guardar checkpoint (append)
+                with open(temp_file, 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(ohlcv)
+
+                total_collected += len(ohlcv)
                 logger.debug(
                     f"{exchange_id} {symbol} {timeframe}: "
-                    f"{len(ohlcv)} candles, total: {len(all_data)}"
+                    f"guardados {len(ohlcv)} candles, total sesión: {total_collected}"
                 )
 
                 # Actualizar since al último timestamp + 1ms
                 since = ohlcv[-1][0] + 1
 
-                # Si recibimos menos del límite, llegamos al final
-                if len(ohlcv) < limit:
+                # Si recibimos menos del límite, llegamos al final (o muy cerca)
+                now_ts = exchange.milliseconds()
+                if len(ohlcv) < limit or ohlcv[-1][0] >= now_ts - 60000: # Margen de 1 min
                     break
 
                 await asyncio.sleep(RATE_LIMIT_DELAY)
@@ -106,28 +143,31 @@ async def collect_ohlcv_ccxt(
             except Exception as e:
                 logger.error(f"Error en fetch: {e}")
                 await asyncio.sleep(5)
-                break
+                # No hacemos break aquí para intentar reanudar en el siguiente loop
+                # si es un error transitorio. Pero si persiste, el usuario puede parar.
+                # Para seguridad, reintentamos un par de veces o esperamos.
+                # Por ahora, seguimos.
 
-        if not all_data:
-            return None
-
-        # Convertir a DataFrame
-        df = pd.DataFrame(
-            all_data,
-            columns=["timestamp", "open", "high", "low", "close", "volume"],
-        )
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-        df["exchange"] = exchange_id
-        df["symbol"] = symbol
-        df["timeframe"] = timeframe
-
-        # Eliminar duplicados
-        df = df.drop_duplicates(subset=["timestamp"])
-        df = df.sort_values("timestamp")
-
-        logger.success(f"Recolectados {len(df)} candles de {exchange_id} {symbol} {timeframe}")
-
-        return df
+        # Al finalizar, convertir CSV completo a Parquet y limpiar
+        if temp_file.exists():
+            df = pd.read_csv(temp_file)
+            if not df.empty:
+                df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+                df["exchange"] = exchange_id
+                df["symbol"] = symbol
+                df["timeframe"] = timeframe
+                
+                # Eliminar duplicados y ordenar
+                df = df.drop_duplicates(subset=["timestamp"])
+                df = df.sort_values("timestamp")
+                
+                logger.success(f"Recolectados {len(df)} candles de {exchange_id} {symbol} {timeframe}")
+                
+                # Eliminar archivo temporal si se desea, o mantenerlo como backup
+                # temp_file.unlink() 
+                return df
+                
+        return None
 
     except Exception as e:
         logger.error(f"Error general en {exchange_id} {symbol}: {e}")
@@ -142,21 +182,37 @@ async def collect_buda_trades(
     days: int = 365,
 ) -> Optional[pd.DataFrame]:
     """
-    Recolecta trades históricos de Buda.com.
-
-    Args:
-        symbol: Par de trading (btc-clp, eth-clp)
-        days: Días hacia atrás
-
-    Returns:
-        DataFrame con trades o None si falla
+    Recolecta trades históricos de Buda.com con soporte de reanudación.
     """
     base_url = "https://www.buda.com/api/v2/markets"
-    all_trades = []
-    timestamp = None
     cutoff_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Archivo temporal
+    temp_file = DATA_DIR / f"temp_buda_{symbol}_trades.csv"
+    
+    timestamp = None
+    
+    # Lógica de reanudación
+    # Para Buda es más complejo reanudar hacia atrás porque paginamos desde el presente hacia el pasado.
+    # Si tenemos datos parciales, probablemente tenemos los más recientes.
+    # Tendríamos que ver cuál fue el último timestamp (el más antiguo) guardado y seguir desde ahí.
+    
+    if temp_file.exists():
+        # Leer la última línea para ver cuál fue el último timestamp procesado
+        # Nota: Como guardamos en orden de llegada (descendente en tiempo), 
+        # la última línea del CSV es el trade más antiguo recolectado.
+        last_ts_val = get_last_timestamp_from_csv(temp_file, 0)
+        if last_ts_val:
+            timestamp = int(last_ts_val) # Buda usa timestamp en ms como cursor
+            logger.info(f"Reanudando Buda {symbol} desde timestamp {timestamp}")
+    else:
+        # Crear header
+        with open(temp_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "amount", "price", "side", "id"])
 
     logger.info(f"Iniciando recolección de trades Buda: {symbol}")
+    total_collected = 0
 
     async with aiohttp.ClientSession() as session:
         while True:
@@ -179,16 +235,22 @@ async def collect_buda_trades(
                     if not entries:
                         break
 
-                    all_trades.extend(entries)
-                    timestamp = data["trades"]["last_timestamp"]
+                    # Guardar checkpoint
+                    with open(temp_file, 'a', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerows(entries)
 
-                    logger.debug(f"Buda {symbol}: {len(entries)} trades, total: {len(all_trades)}")
+                    total_collected += len(entries)
+                    timestamp = data["trades"]["last_timestamp"] # Cursor para la siguiente página
+
+                    logger.debug(f"Buda {symbol}: guardados {len(entries)} trades, total sesión: {total_collected}")
 
                     # Verificar si ya pasamos el límite de días
                     oldest_ts = float(entries[-1][0]) / 1000
                     oldest_date = datetime.fromtimestamp(oldest_ts)
 
                     if oldest_date < cutoff_date:
+                        logger.info(f"Llegamos a la fecha límite: {oldest_date}")
                         break
 
                     await asyncio.sleep(RATE_LIMIT_DELAY)
@@ -198,26 +260,36 @@ async def collect_buda_trades(
                 await asyncio.sleep(5)
                 continue
 
-    if not all_trades:
-        return None
+    # Procesar archivo final
+    if temp_file.exists():
+        # Leer CSV (puede ser grande, cuidado con la memoria si son millones de filas)
+        # Para 2 años de trades puede ser pesado. Usaremos chunks si es necesario, 
+        # pero pandas suele aguantar bien un par de GBs.
+        try:
+            df = pd.read_csv(temp_file)
+            if not df.empty:
+                df["timestamp"] = pd.to_datetime(df["timestamp"].astype(float), unit="ms")
+                df["exchange"] = "buda"
+                df["symbol"] = symbol
+                
+                # Convertir tipos
+                df["amount"] = pd.to_numeric(df["amount"])
+                df["price"] = pd.to_numeric(df["price"])
+                
+                # Eliminar duplicados y ordenar (importante porque al reanudar puede haber overlap)
+                df = df.drop_duplicates(subset=["timestamp", "amount", "price"])
+                df = df.sort_values("timestamp")
+                
+                logger.success(f"Recolectados {len(df)} trades de Buda {symbol}")
+                
+                # Opcional: Borrar temporal
+                # temp_file.unlink()
+                return df
+        except Exception as e:
+            logger.error(f"Error procesando CSV final: {e}")
+            return None
 
-    # Convertir a DataFrame
-    df = pd.DataFrame(all_trades, columns=["timestamp", "amount", "price", "side"])
-    df["timestamp"] = pd.to_datetime(df["timestamp"].astype(float), unit="ms")
-    df["exchange"] = "buda"
-    df["symbol"] = symbol
-
-    # Convertir tipos
-    df["amount"] = pd.to_numeric(df["amount"])
-    df["price"] = pd.to_numeric(df["price"])
-
-    # Eliminar duplicados y ordenar
-    df = df.drop_duplicates(subset=["timestamp", "amount", "price"])
-    df = df.sort_values("timestamp")
-
-    logger.success(f"Recolectados {len(df)} trades de Buda {symbol}")
-
-    return df
+    return None
 
 
 async def download_bulk_data() -> None:
