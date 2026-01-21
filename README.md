@@ -869,7 +869,7 @@ if __name__ == "__main__":
 #### 1.2 Base de Datos
 - [x] 1.2.1 Configurar SQLite (dev) / PostgreSQL (prod)
 - [x] 1.2.2 Modelos SQLAlchemy (User, Portfolio, Trade, Order, OHLCV)
-- [ ] 1.2.3 Migraciones Alembic
+- [x] 1.2.3 Migraciones Alembic
 - [ ] 1.2.4 Seeds de datos iniciales
 
 #### 1.3 Autenticación
