@@ -1425,7 +1425,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 
 ## 12. CHECKLIST DE PROGRESO
 
-### Estado Actual (Actualizado: 2026-01-18)
+### Estado Actual (Actualizado: 2026-01-21)
 
 ```
 [██████████] 100% - Fase 0: Setup Inicial ✓
@@ -1433,11 +1433,19 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 [██████████] 100% - Fase 2: Frontend Móvil ✓ (COMPLETADO)
 [██████████]  95% - Fase 3: Trading Engine ✓ (PAPER TRADING VERIFICADO)
 [░░░░░░░░░░]   0% - Fase 4: Machine Learning
-[████░░░░░░]  40% - Fase 5: Tiempo Real 🔄 (WebSocket Frontend listo)
-[░░░░░░░░░░]   0% - Fase 6: Deployment
+[██████████] 100% - Fase 5: Tiempo Real ✓ (WebSocket Backend + Frontend listo)
+[████░░░░░░]  40% - Fase 6: Deployment 🔄 (AWS Free Tier Docs + Scripts listos)
 [░░░░░░░░░░]   0% - Fase 7: QA
 [░░░░░░░░░░]   0% - Fase 8: Producción
 ```
+
+### Registro de Cambios (Changelog)
+
+#### 2026-01-21
+- ☁️ **Despliegue AWS Free Tier**: Documentación completa y script de configuración automática (`scripts/deploy/setup_server.sh`).
+- 🐳 **Docker Fixes**: Corrección de `Dockerfile` (copia de README faltante) y creación de `backend/README.md`.
+- 🔄 **WebSocket Mobile**: Integración de WebSocket en App Móvil para precios en tiempo real.
+- 💾 **Data Collection**: Soporte de checkpoints para recolección de datos históricos tolerante a fallos.
 
 ### Pruebas de Paper Trading (2026-01-18)
 

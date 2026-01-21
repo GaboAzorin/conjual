@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 FROM base AS deps
 
 # Copy only dependency files first (better caching)
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 
 # Install dependencies
 RUN pip install --upgrade pip && \
