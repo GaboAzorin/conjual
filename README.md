@@ -843,7 +843,7 @@ if __name__ == "__main__":
 
 - [x] 0.1 Configurar estructura de carpetas
 - [x] 0.2 Inicializar proyecto Python (pyproject.toml / poetry)
-- [ ] 0.3 Inicializar proyecto Expo
+- [x] 0.3 Inicializar proyecto Expo
 - [ ] 0.4 Configurar git hooks (pre-commit)
 - [x] 0.5 Configurar linters (ruff, eslint)
 - [x] 0.6 Crear .env.example para variables de entorno
@@ -913,7 +913,7 @@ if __name__ == "__main__":
 #### 2.3 Componentes UI
 - [x] 2.3.1 Header con balance
 - [x] 2.3.2 Card de precio (BTC)
-- [ ] 2.3.3 Gráfico de línea simple
+- [x] 2.3.3 Gráfico de velas (Candlestick Chart)
 - [x] 2.3.4 Lista de transacciones
 - [x] 2.3.5 Botones de acción (Start/Stop/Pause)
 - [x] 2.3.6 Modal de confirmación (Alerts)
@@ -1522,7 +1522,6 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
   - User, AuthTokens, Portfolio, Trade, BotStatus, etc.
 
 - [ ] **Pendiente**
-  - Gráfico de precios con react-native-wagmi-charts
   - WebSocket para actualizaciones en tiempo real
 
 ### Completado en Fase 3 ✅ (Trading Engine - VERIFICADO)
@@ -1575,7 +1574,7 @@ Semana 7+: [░░░░░░░░░░] Fase 8 (Producción)
 1. ~~**Opción A:** Probar paper trading completo~~ ✅
 2. ~~**Opción C:** Iniciar Fase 2 - Frontend móvil~~ 🔄 (85% completado)
 3. **Opción B:** Agregar API keys de Buda.com y probar con datos reales
-4. **Opción D:** Agregar gráficos de precios (react-native-wagmi-charts)
+4. ~~**Opción D:** Agregar gráficos de precios (react-native-wagmi-charts)~~ ✅
 5. **Opción E:** Implementar WebSocket para tiempo real (Fase 5)
 6. **Opción F:** Ejecutar recolección de datos históricos para ML (Fase 4)
 7. **Opción G:** Crear tests unitarios (pytest) para >80% coverage

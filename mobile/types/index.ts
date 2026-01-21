@@ -100,7 +100,7 @@ export interface Ticker {
 }
 
 export interface OHLCV {
-  timestamp: string;
+  timestamp: number;
   open: number;
   high: number;
   low: number;

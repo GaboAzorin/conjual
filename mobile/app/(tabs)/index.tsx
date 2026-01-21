@@ -7,21 +7,23 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { CandlestickChart } from 'react-native-wagmi-charts';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useBotStore, useMarketStore, useAuthStore } from '@/stores';
 
 export default function DashboardScreen() {
   const { user } = useAuthStore();
   const { status, fetchStatus } = useBotStore();
-  const { ticker, fetchTicker, isLoading: marketLoading } = useMarketStore();
+  const { ticker, fetchTicker, ohlcv, fetchOHLCV, isLoading: marketLoading } = useMarketStore();
 
   useEffect(() => {
     fetchStatus();
     fetchTicker();
+    fetchOHLCV();
   }, []);
 
   const onRefresh = async () => {
-    await Promise.all([fetchStatus(), fetchTicker()]);
+    await Promise.all([fetchStatus(), fetchTicker(), fetchOHLCV()]);
   };
 
   const formatCLP = (value: number) => {
@@ -87,6 +89,29 @@ export default function DashboardScreen() {
               </View>
             </View>
           </View>
+        </View>
+
+        {/* Price Chart */}
+        <View className="bg-dark-800 rounded-2xl p-4 mb-4">
+          <Text className="text-white font-semibold mb-4">Gráfico (1H)</Text>
+          {ohlcv.length > 0 ? (
+            <CandlestickChart.Provider data={ohlcv}>
+              <CandlestickChart height={150}>
+                <CandlestickChart.Candles />
+                <CandlestickChart.Crosshair />
+              </CandlestickChart>
+              <View className="flex-row justify-between mt-2">
+                <CandlestickChart.PriceText type="open" format={({ value }) => `$${value}`} />
+                <CandlestickChart.PriceText type="high" format={({ value }) => `$${value}`} />
+                <CandlestickChart.PriceText type="low" format={({ value }) => `$${value}`} />
+                <CandlestickChart.PriceText type="close" format={({ value }) => `$${value}`} />
+              </View>
+            </CandlestickChart.Provider>
+          ) : (
+            <View className="h-[150px] items-center justify-center">
+              <Text className="text-dark-400">Cargando gráfico...</Text>
+            </View>
+          )}
         </View>
 
         {/* Portfolio Card */}
